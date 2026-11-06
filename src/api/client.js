@@ -1,16 +1,19 @@
-import axios from 'axios'
+import axios from "axios";
 
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-})
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-// Before every request, attach the login token if we have one
+// Automatically attach Bearer Token to outgoing requests
 client.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem("token");
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
-})
+  return config;
+});
 
-export default client
+export default client;

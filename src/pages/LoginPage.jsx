@@ -1,49 +1,81 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import client from '../api/client'
+// src/pages/LoginPage.jsx
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-function LoginPage() {
-  const [loginId, setLoginId] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const navigate = useNavigate()
+const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function handleLogin(e) {
-    e.preventDefault()
-    setError('')
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
-      const res = await client.post('/api/auth/login', { loginId, password })
-      localStorage.setItem('token', res.data.accessToken)
-
-      const me = await client.get('/api/users/me')
-      localStorage.setItem('role', me.data.role)
-      console.log('Logged in as:', me.data)
-
-      navigate('/')
+      const user = await login(loginId, password);
+      // Customer -> Home, Staff -> Tour Management
+      if (user.role === "ADMIN") {
+        navigate("/admin/tours");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
-      console.log('Login failed:', err)
-      setError('Login failed. Check the console (F12) for details.')
+      setError(err.response?.data?.message || "아이디 또는 비밀번호가 맞지 않습니다.");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <form onSubmit={handleLogin}>
-      <h2>Login</h2>
-      <input
-        placeholder="ID"
-        value={loginId}
-        onChange={(e) => setLoginId(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">Login</button>
-      {error && <p>{error}</p>}
-    </form>
-  )
-}
+    <div style={{ maxWidth: "380px", margin: "60px auto", padding: "24px", border: "1px solid #ddd", borderRadius: "8px", background: "#fff" }}>
+      <h2>로그인 (Login)</h2>
 
-export default LoginPage
+      {error && <div style={{ color: "red", marginBottom: "12px", fontSize: "14px" }}>{error}</div>}
+
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        <div>
+          <label style={{ display: "block", marginBottom: "4px", fontSize: "14px" }}>아이디</label>
+          <input
+            type="text"
+            value={loginId}
+            onChange={(e) => setLoginId(e.target.value)}
+            placeholder="user123 또는 admin"
+            required
+            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
+          />
+        </div>
+
+        <div>
+          <label style={{ display: "block", marginBottom: "4px", fontSize: "14px" }}>비밀번호</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="password123! 또는 admin123!"
+            required
+            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          style={{ padding: "10px", background: "#0f3460", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
+        >
+          {loading ? "로그인 중..." : "로그인"}
+        </button>
+      </form>
+
+      <div style={{ marginTop: "16px", textAlign: "center", fontSize: "14px" }}>
+        계정이 없으신가요? <Link to="/signup">회원가입</Link>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;
