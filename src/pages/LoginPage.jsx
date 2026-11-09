@@ -1,5 +1,4 @@
-// src/pages/LoginPage.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -18,7 +17,6 @@ const LoginPage = () => {
 
     try {
       const user = await login(loginId, password);
-      // Customer -> Home, Staff -> Tour Management
       if (user.role === "ADMIN") {
         navigate("/admin/tours");
       } else {

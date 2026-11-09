@@ -99,7 +99,7 @@ const PaymentPage = () => {
         <button
           type="submit"
           disabled={processing}
-          style={{ width: "100%", padding: "14px", background: "#e94560", color: "#fff", border: "none", borderRadius: "6px", fontSize: "16px", fontWeight: "bold", cursor: "pointer", marginTop: "10px" }}
+          style={{ width: "100%", padding: "14px", background: "#104aa2", color: "#fff", border: "none", borderRadius: "6px", fontSize: "16px", fontWeight: "bold", cursor: "pointer", marginTop: "10px" }}
         >
           {processing ? "결제 처리 중..." : `${targetBooking.totalPrice?.toLocaleString()}원 결제하기`}
         </button>

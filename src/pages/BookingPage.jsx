@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getTourByIdApi } from "../api/tours";
+import { getTourByIdApi, calculateTourPriceApi } from "../api/tours";
 import { useAuth } from "../context/AuthContext";
 
 const STYLES = [

@@ -9,14 +9,13 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import BookingPage from "./pages/BookingPage";
-import PastTourPage from "./pages/PastTourPage";
+import PastTourPage from "./pages/PastTourPages";
 import PaymentPage from "./pages/PaymentPage";
+import AIChatBotPage from "./pages/AIChatBotPage";
+import TourManagePage from "./pages/TourManagePage";
+import BookingManagePage from "./pages/BookingManagePage";
+import SouvenirInventoryPage from "./pages/SouvenirInventoryPage";
 
-// Temporary placeholders for remaining pages to prevent routing crashes
-const AIChatBotPage = () => <div style={{ padding: 20 }}>AIChatBot Page Placeholder</div>;
-const TourManagePage = () => <div style={{ padding: 20 }}>Tour Manage Page (Staff)</div>;
-const BookingManagePage = () => <div style={{ padding: 20 }}>Booking Manage Page (Staff)</div>;
-const SouvenirInventoryPage = () => <div style={{ padding: 20 }}>Souvenir Inventory Page (Staff)</div>;
 
 function App() {
   return (
@@ -46,14 +45,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/ai-chat"
-            element={
-              <ProtectedRoute requiredRole="USER">
-                <AIChatBotPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/ai-chat" element={<AIChatBotPage />} />
 
           {/* Staff Only Routes */}
           <Route

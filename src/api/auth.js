@@ -4,12 +4,17 @@ import { mockUsers } from "../mocks/data";
 
 const IS_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const sleep = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
+const toPublicUser = (user) => {
+  const publicUser = { ...user };
+  delete publicUser.password;
+  return publicUser;
+};
 
 export const loginApi = async (loginId, password) => {
   if (IS_MOCK) {
     await sleep();
     const user = mockUsers.find(
-      (u) => u.loginId === loginId && u.password === password
+      (u) => u.loginId === loginId.trim() && u.password === password
     );
     if (!user) {
       const error = new Error("Invalid ID or password.");
@@ -19,6 +24,7 @@ export const loginApi = async (loginId, password) => {
     return {
       accessToken: `mock-jwt-${user.role.toLowerCase()}-token`,
       tokenType: "Bearer",
+      user: toPublicUser(user),
     };
   }
 
@@ -76,12 +82,10 @@ export const signupApi = async (signUpData) => {
 export const getMeApi = async () => {
   if (IS_MOCK) {
     await sleep();
-    // Retrieve mock user based on the active token format
     const token = localStorage.getItem("token");
-    if (token && token.includes("admin")) {
-      return mockUsers.find((u) => u.role === "ADMIN") || mockUsers[1];
-    }
-    return mockUsers[0];
+    const role = token?.match(/^mock-jwt-(user|admin)-token$/)?.[1]?.toUpperCase();
+    const user = mockUsers.find((mockUser) => mockUser.role === role);
+    return user ? toPublicUser(user) : null;
   }
 
   const response = await client.get("/api/users/me");

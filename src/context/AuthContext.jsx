@@ -29,12 +29,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (loginId, password) => {
     // 1. Call login endpoint to receive Bearer token
-    const data = await loginApi(loginId, password);
+    const data = await loginApi(loginId.trim(), password);
     setToken(data.accessToken);
     localStorage.setItem("token", data.accessToken);
 
     // 2. Call GET /api/users/me to fetch role and profile details
-    const userData = await getMeApi();
+    const userData = data.user || await getMeApi();
+    if (!userData?.role) {
+      throw new Error("로그인한 사용자의 권한 정보를 확인할 수 없습니다.");
+    }
     setUser(userData);
     localStorage.setItem("role", userData.role);
     return userData;
