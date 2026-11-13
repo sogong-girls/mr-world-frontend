@@ -43,6 +43,22 @@ const BookingPage = () => {
   const [selectedFoodId, setSelectedFoodId] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [participantsCount, setParticipantsCount] = useState(2);
+
+  const handleParticipantsChange = (e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    if (raw === "") {
+      setParticipantsCount(0);
+      return;
+    }
+    setParticipantsCount(Math.min(10, Number(raw)));
+  };
+
+  const handleParticipantsBlur = () => {
+    if (!participantsCount || participantsCount < 1) {
+      setParticipantsCount(1);
+    }
+  };
+
   const [startDate, setStartDate] = useState(() => {
     const nextMonth = new Date();
     nextMonth.setDate(nextMonth.getDate() + 14);
@@ -144,6 +160,9 @@ const BookingPage = () => {
     }
 
     setSubmitting(true);
+    const finalParticipantsCount = Math.max(1, Number(participantsCount) || 1);
+    setParticipantsCount(finalParticipantsCount);
+
     try {
       const startIso = `${startDate}T${tour.departureTime || "09:00"}:00+09:00`;
       const endObj = new Date(startDate);
@@ -155,7 +174,7 @@ const BookingPage = () => {
         tourStyleId: activeStyle?.id,
         hotelOptionId: activeHotel?.id ?? null,
         foodOptionId: activeFood?.id ?? null,
-        participantsCount,
+        participantsCount: finalParticipantsCount,
         startAt: startIso,
         endAt: endIso,
         bookingAddons: selectedAddons,
@@ -163,7 +182,7 @@ const BookingPage = () => {
       };
 
       const created = await createBookingApi(payload);
-      const isPending = created?.status === "PENDING" || participantsCount < 3;
+      const isPending = created?.status === "PENDING" || finalParticipantsCount < 3;
 
       alert(
         isPending
@@ -313,38 +332,42 @@ const BookingPage = () => {
         )}
 
         {/* Step 5: 출발일 및 인원 수 */}
-        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-          <div>
-            <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px", color: "#222" }}>
-              5. 출발 희망일
-            </label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
-              style={{ padding: "8px 10px", borderRadius: "6px", border: "1px solid #ccc" }}
-            />
+        <div>
+          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "flex-start" }}>
+            <div>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px", color: "#222" }}>
+                5. 출발 희망일
+              </label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                required
+                style={{ padding: "8px 10px", borderRadius: "6px", border: "1px solid #ccc" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px", color: "#222" }}>
+                6. 인원 수 선택
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                value={String(participantsCount)}
+                onChange={handleParticipantsChange}
+                onBlur={handleParticipantsBlur}
+                style={{ width: "100px", padding: "8px 10px", borderRadius: "6px", border: "1px solid #ccc" }}
+              />
+            </div>
           </div>
 
-          <div>
-            <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px", color: "#222" }}>
-              6. 인원 수 선택
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="10"
-              value={participantsCount}
-              onChange={(e) => setParticipantsCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
-              style={{ width: "100px", padding: "8px 10px", borderRadius: "6px", border: "1px solid #ccc" }}
-            />
-            {participantsCount < 3 && (
-              <div style={{ fontSize: "12px", color: "#b45309", marginTop: "6px" }}>
-                * 3명 미만 예약은 <strong>PENDING(모객 대기)</strong> 상태로 접수되며, 다른 대기 예약과 합산되어 3명 이상이 되면 자동 확정됩니다.
-              </div>
-            )}
-          </div>
+          {participantsCount < 3 && (
+            <div style={{ fontSize: "12px", color: "#b45309", marginTop: "8px" }}>
+              * 3명 미만 예약은 <strong>PENDING(모객 대기)</strong> 상태로 접수되며, 다른 대기 예약과 합산되어 3명 이상이 되면 자동 확정됩니다.
+            </div>
+          )}
         </div>
 
         {/* 실시간 계산서 */}
