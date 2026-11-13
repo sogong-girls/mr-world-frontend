@@ -31,7 +31,9 @@ const LoginPage = () => {
 
   return (
     <div style={{ maxWidth: "380px", margin: "60px auto", padding: "24px", border: "1px solid #ddd", borderRadius: "8px", background: "#fff" }}>
-      <h2>로그인 (Login)</h2>
+      <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#0f3460" }}>
+  로그인 (Login)
+</h2>
 
       {error && <div style={{ color: "red", marginBottom: "12px", fontSize: "14px" }}>{error}</div>}
 

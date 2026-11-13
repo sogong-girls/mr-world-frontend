@@ -161,8 +161,7 @@ const AIChatBotPage = () => {
         ← 돌아가기
       </button>
 
-      <div className="ai-chat-intro">
-        <span className="ai-chat-eyebrow">YOUR TRAVEL, REIMAGINED</span>
+<div className="ai-chat-intro">
         <h1>AI 여행 플래너</h1>
         <p>지난 여행을 돌아보고, 다음 여정을 함께 계획해 보세요.</p>
       </div>

@@ -45,7 +45,7 @@ const SignUpPage = () => {
 
   return (
     <div style={{ maxWidth: "400px", margin: "40px auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" }}>
-      <h2>회원가입 (Sign Up)</h2>
+      <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#0f3460" }}>회원가입(Sign Up)</h2>
 
       {/* Account Type Selector Tabs */}
       <div style={{ display: "flex", marginBottom: "20px" }}>
@@ -79,7 +79,7 @@ const SignUpPage = () => {
           <input name="staffCode" placeholder="직원 인증 코드 (Mock: ADMIN123)" value={formData.staffCode} onChange={handleChange} required />
         )}
 
-        <button type="submit" disabled={loading} style={{ padding: "10px", background: "#4ecca3", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>
+        <button type="submit" disabled={loading} style={{ padding: "10px", background: "#0f3460", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>
           {loading ? "가입 중..." : "가입하기"}
         </button>
       </form>

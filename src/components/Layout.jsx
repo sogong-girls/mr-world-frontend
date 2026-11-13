@@ -1,3 +1,4 @@
+// src/components/Layout.jsx
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getMyBookingsApi } from "../api/bookings";
@@ -10,6 +11,8 @@ const Layout = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [travelHistory, setTravelHistory] = useState({ userKey: null, status: "idle", lastTrip: null });
+  const [isWidgetPromptOpen, setIsWidgetPromptOpen] = useState(true);
+
   const userKey = user?.id || user?.loginId || user?.name;
   const showTravelHistory = isAuthenticated && role !== "ADMIN";
   const historyLoading = showTravelHistory && (authLoading || travelHistory.userKey !== userKey);
@@ -70,6 +73,7 @@ const Layout = () => {
           <nav className="header-nav" aria-label="주요 메뉴">
             {role === "ADMIN" ? (
               <>
+                <Link to="/">테마 투어</Link>
                 <Link to="/admin/tours">투어 관리</Link>
                 <Link to="/admin/bookings">예약 현황</Link>
                 <Link to="/admin/inventory">창고 재고</Link>
@@ -106,30 +110,44 @@ const Layout = () => {
 
       {role !== "ADMIN" && pathname !== "/ai-chat" && (
         <div className="ai-widget">
-          <button type="button" className="ai-widget-prompt" onClick={handleAiClick}>
-            <strong>AI 여행 안내</strong>
-            {showTravelHistory ? (
-              historyLoading ? (
-                <span>지난 여행 기록을 확인하고 있어요...</span>
-              ) : previousTripDetails ? (
-                <span className="ai-widget-trip-details">
-                  <span className="ai-widget-history-greeting">{user?.name || "고객"}님, 지난 여행 이력이 있어요</span>
-                  <span className="ai-widget-history-name">{previousTripDetails.name}</span>
-                  <span><b>일정</b>{previousTripDetails.dates}</span>
-                  <span><b>인원</b>{previousTripDetails.travelers}</span>
-                  <span><b>등급</b>{previousTripDetails.style}</span>
-                  <span><b>옵션</b>{previousTripDetails.options.join(", ")}</span>
-                  <span className="ai-widget-history-cta">눌러서 여행 플래너와 이야기하기</span>
-                </span>
-              ) : travelHistory.status === "error" ? (
-                <span>여행 기록을 불러오지 못했어요. 눌러서 AI 플래너와 이야기해 보세요.</span>
-              ) : (
-                <span>{user?.name || "고객"}님, 어떤 여행을 계획해 볼까요?</span>
-              )
-            ) : (
-              "클릭해서 대화를 시작하세요!"
-            )}
-          </button>
+          {isWidgetPromptOpen && (
+            <div className="ai-widget-prompt-wrap">
+              <button
+                type="button"
+                className="ai-widget-close"
+                onClick={() => setIsWidgetPromptOpen(false)}
+                aria-label="AI 안내 팝업 닫기"
+                title="닫기"
+              >
+                ✕
+              </button>
+
+              <button type="button" className="ai-widget-prompt" onClick={handleAiClick}>
+                <strong>AI 여행 안내</strong>
+                {showTravelHistory ? (
+                  historyLoading ? (
+                    <span>지난 여행 기록을 확인하고 있어요...</span>
+                  ) : previousTripDetails ? (
+                    <span className="ai-widget-trip-details">
+                      <span className="ai-widget-history-greeting">{user?.name || "고객"}님, 지난 여행 이력이 있어요</span>
+                      <span className="ai-widget-history-name">{previousTripDetails.name}</span>
+                      <span><b>일정</b>{previousTripDetails.dates}</span>
+                      <span><b>인원</b>{previousTripDetails.travelers}</span>
+                      <span><b>등급</b>{previousTripDetails.style}</span>
+                      <span><b>옵션</b>{previousTripDetails.options.join(", ")}</span>
+                      <span className="ai-widget-history-cta">눌러서 여행 플래너와 이야기하기</span>
+                    </span>
+                  ) : travelHistory.status === "error" ? (
+                    <span>여행 기록을 불러오지 못했어요. 눌러서 AI 플래너와 이야기해 보세요.</span>
+                  ) : (
+                    <span>{user?.name || "고객"}님, 어떤 여행을 계획해 볼까요?</span>
+                  )
+                ) : (
+                  "클릭해서 대화를 시작하세요!"
+                )}
+              </button>
+            </div>
+          )}
 
           <button className="ai-widget-button" onClick={handleAiClick} aria-label="AI 여행 안내 열기">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -7,7 +7,6 @@ const client = axios.create({
   },
 });
 
-// Automatically attach Bearer Token to outgoing requests
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {

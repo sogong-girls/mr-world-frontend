@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getToursApi } from "../api/tours";
 import { getMyBookingsApi } from "../api/bookings";
 import { useAuth } from "../context/AuthContext";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const THEME_IMAGES = {
   HONEYMOON: "https://images.unsplash.com/photo-1611441085268-7674a97a0905?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
@@ -80,7 +81,7 @@ const HomePage = () => {
 
       <section className="hero shell relative mx-auto w-[min(1180px,calc(100%-48px))] py-[82px] text-center max-[680px]:w-[calc(100%-28px)] max-[680px]:pt-[54px] max-[680px]:pb-[48px]">
         <div className="hero-title" role="heading" aria-level={1}>
-          원하는 여행을 <br />직접 꾸려보세요
+          특별한 날, 가장 멋있는 장소에서 사랑하는 사람에게  <br /> 잊지 못할 여행의 감동을 선물하세요.
         </div>
       </section>
 
@@ -103,7 +104,7 @@ const HomePage = () => {
         </div>
 
         {loading ? (
-          <div className="tour-list-message">테마 투어 목록을 불러오는 중...</div>
+          <LoadingIndicator text="테마 투어 목록을 불러오는 중" />
         ) : filteredTours.length === 0 ? (
           <div className="tour-list-message">해당 테마의 등록된 투어 상품이 없습니다.</div>
         ) : (
