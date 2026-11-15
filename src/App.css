@@ -387,7 +387,7 @@
 .ai-widget {
   position: fixed;
   right: 24px;
-  bottom: 22vh;
+  bottom: 20px;
   z-index: 45;
   display: flex;
   flex-direction: column;
@@ -1078,11 +1078,443 @@
 
   .ai-widget {
     right: 14px;
-    bottom: 17vh;
+    bottom: 14px;
   }
 
   .ai-widget-button {
     width: 52px;
     height: 52px;
+  }
+}
+
+/* ===== 예약 페이지 (스타일 카드, 일차×끼니 추가 옵션 표, 금액) ===== */
+.booking-page {
+  max-width: 820px;
+  margin: 24px auto;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e6e7e1;
+  border-radius: 12px;
+  color: #202522;
+}
+
+.booking-tour-summary {
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid #e6e7e1;
+  border-radius: 10px;
+  background: #f7f8f4;
+}
+
+.booking-tour-summary h3 {
+  margin: 6px 0;
+  color: #2c5f4c;
+}
+
+.booking-tour-summary p {
+  margin: 0 0 10px;
+  color: #4f5752;
+  font-size: 14px;
+}
+
+.booking-tour-summary dl {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.booking-tour-summary dl > div {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.booking-tour-summary dt {
+  color: #69716c;
+}
+
+.booking-tour-summary dd {
+  margin: 0;
+}
+
+.booking-theme {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #eaf2ed;
+  color: #2c5f4c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.booking-ai-note {
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  border: 1px solid #cfe1d5;
+  border-radius: 10px;
+  background: #eef5f1;
+  color: #2c5f4c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.booking-style-card {
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  text-align: left;
+  cursor: pointer;
+}
+
+.booking-style-card.is-selected {
+  border: 2px solid #2c5f4c;
+  background: #eef5f1;
+}
+
+.booking-style-price {
+  color: #2c5f4c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.booking-style-desc {
+  color: #666;
+  font-size: 12px;
+}
+
+.booking-hint {
+  margin-top: 6px;
+  color: #69716c;
+  font-size: 12px;
+}
+
+.addon-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e6e7e1;
+  border-radius: 8px;
+}
+
+.addon-table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.addon-table th,
+.addon-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #f0f0ec;
+  text-align: center;
+}
+
+.addon-table thead th {
+  background: #f7f8f4;
+  color: #4f5752;
+}
+
+.addon-table tbody th {
+  color: #4f5752;
+  white-space: nowrap;
+}
+
+.addon-cell {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.addon-chip {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid #d5d8d0;
+  border-radius: 999px;
+  background: #fff;
+  color: #4f5752;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.addon-chip.is-on {
+  border-color: #2c5f4c;
+  background: #2c5f4c;
+  color: #fff;
+  font-weight: 700;
+}
+
+.addon-summary {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: #4f5752;
+  font-size: 12px;
+}
+
+.addon-clear {
+  flex: 0 0 auto;
+  border: 0;
+  background: none;
+  color: #99575b;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.booking-warning {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.booking-price {
+  padding: 15px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.booking-price h4 {
+  margin: 0 0 10px;
+}
+
+.booking-price h4 small {
+  margin-left: 6px;
+  color: #69716c;
+  font-weight: 400;
+}
+
+.booking-price hr {
+  margin: 10px 0;
+  border: 0;
+  border-top: 1px solid #eee;
+}
+
+.booking-price-row,
+.booking-price-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  color: #555;
+  font-size: 14px;
+}
+
+.booking-price-row.is-discount {
+  color: #ce6f72;
+}
+
+.booking-price-total {
+  margin: 0;
+  color: #2c5f4c;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.is-struck {
+  color: #9aa09c;
+  text-decoration: line-through;
+}
+
+.booking-error {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fbefed;
+  color: #99575b;
+  font-size: 14px;
+}
+
+.booking-submit {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #2c5f4c;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.booking-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ===== AI 채팅 (예약 내용 표시, 선택지, 금액, 결제 안내) ===== */
+.ai-chat-reset {
+  margin-left: auto;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #e2e8e2;
+  border-radius: 999px;
+  background: #fff;
+  color: #53615a;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ai-chat-draft {
+  padding: 10px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid #edf0eb;
+  background: #fff;
+}
+
+.ai-chat-draft-item {
+  padding: 4px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px dashed #d5d8d0;
+  border-radius: 999px;
+  color: #69716c;
+  font-size: 11px;
+}
+
+.ai-chat-draft-item b {
+  color: #3a443d;
+}
+
+.ai-chat-draft-item.is-confirmed {
+  border-style: solid;
+  border-color: #b8cdbd;
+  background: #eff5f0;
+  color: #2c5f4c;
+}
+
+.ai-chat-draft-item i {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.ai-chat-message.is-error {
+  border-color: #e7c5c2 !important;
+  background: #fbefed !important;
+  color: #99575b !important;
+}
+
+.ai-chat-typing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #77827a !important;
+}
+
+.ai-chat-price {
+  margin-top: 10px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid #e6ebe5;
+  border-radius: 12px;
+  background: #f7f9f6;
+}
+
+.ai-chat-price > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-chat-price .is-discount {
+  color: #ce6f72;
+}
+
+.ai-chat-price .is-final {
+  color: #2c5f4c;
+  font-weight: 800;
+}
+
+.ai-chat-pay-notice {
+  margin-bottom: 10px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #e7c5c2;
+  border-radius: 10px;
+  background: #fbefed;
+  color: #99575b;
+  font-weight: 700;
+}
+
+.ai-chat-pay-notice button {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #ce6f72;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ai-chat-date-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-chat-date-choice input {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #e2e8e2;
+  border-radius: 999px;
+  color: #456150;
+  font-size: 12px;
+}
+
+/* 말풍선 한 줄 요약 (좁은 화면에서 카드를 가리지 않게) */
+.ai-widget-summary {
+  width: 100%;
+  padding: 2px 0 0;
+  border: 0;
+  background: none;
+  color: #2c5f4c;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  .booking-page {
+    margin: 12px auto;
+    padding: 16px;
+  }
+
+  .addon-table {
+    min-width: 0;
+  }
+
+  .addon-table th,
+  .addon-table td {
+    padding: 6px 4px;
+  }
+
+  .addon-cell {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .addon-chip {
+    padding: 0 8px;
   }
 }
