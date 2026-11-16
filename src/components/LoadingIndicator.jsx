@@ -12,7 +12,7 @@ const LoadingIndicator = ({ text = "불러오는 중" }) => {
     return () => clearInterval(timer);
   }, []);
 
-  // 문구 끝의 "..."은 제거하고 동적 점을 붙임
+  // 문구 끝에 동적 점을 붙임
   const cleanText = text.replace(/\.+$/, "").trim();
 
   return (

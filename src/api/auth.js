@@ -17,8 +17,8 @@ export const loginApi = async (loginId, password) => {
       (u) => u.loginId === loginId.trim() && u.password === password
     );
     if (!user) {
-      const error = new Error("Invalid ID or password.");
-      error.response = { status: 401, data: { message: "Invalid ID or password." } };
+      const error = new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
+      error.response = { status: 401, data: { message: "아이디 또는 비밀번호가 올바르지 않습니다." } };
       throw error;
     }
     return {

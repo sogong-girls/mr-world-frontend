@@ -1,6 +1,6 @@
 // src/pages/TourManagePage.jsx
 import { useEffect, useState } from "react";
-import { getToursApi } from "../api/tours";
+import { getToursApi, createTourApi } from "../api/tours";
 import LoadingIndicator from "../components/LoadingIndicator";
 
 const THEME_TABS = [
@@ -14,6 +14,9 @@ const THEME_TABS = [
 const TourManagePage = () => {
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitMessage, setSubmitMessage] = useState("");
   const [selectedThemeFilter, setSelectedThemeFilter] = useState("ALL");
   const [selectedTour, setSelectedTour] = useState(null);
 
@@ -40,33 +43,49 @@ const TourManagePage = () => {
     fetchTours();
   }, []);
 
-  const handleAddTour = (e) => {
+  const handleAddTour = async (e) => {
     e.preventDefault();
-    if (!name || !destination) {
-      alert("투어 이름과 목적지를 입력해 주세요.");
+    if (!name.trim() || !destination.trim()) {
+      setSubmitError("투어 이름과 목적지를 입력해 주세요.");
+      setSubmitMessage("");
       return;
     }
 
+    setSubmitting(true);
+    setSubmitError("");
+    setSubmitMessage("");
+
     const newTour = {
       id: tours.length + 1,
-      name,
+      name: name.trim(),
       tourTheme,
-      departure,
-      destination,
-      course: course || `${departure} → ${destination}`,
+      departure: departure.trim(),
+      destination: destination.trim(),
+      course: course.trim() || `${departure.trim()} → ${destination.trim()}`,
       basePrice: Number(basePrice),
       styles: [{ id: Date.now(), type: "CLASSIC", basePrice: Number(basePrice), description: "기본 패키지" }],
-      description,
+      description: description.trim(),
     };
 
-    setTours((prev) => [...prev, newTour]);
-    setSelectedTour(newTour);
-    alert(`[${name}] 신규 투어 상품이 등록되었습니다.`);
-
-    setName("");
-    setDestination("");
-    setCourse("");
-    setDescription("");
+    try {
+      const { tour: savedTour, persisted } = await createTourApi(newTour);
+      setTours((prev) => [...prev, savedTour]);
+      setSelectedTour(savedTour);
+      setSubmitMessage(
+        persisted
+          ? `[${savedTour.name}] 투어가 서버에 등록되었습니다.`
+          : `[${savedTour.name}] 서버에 연결할 수 없어 현재 브라우저 세션에만 저장했습니다. 서버 연결 후 다시 등록해 주세요.`
+      );
+      setName("");
+      setDestination("");
+      setCourse("");
+      setDescription("");
+    } catch (err) {
+      console.error("Failed to create tour:", err);
+      setSubmitError(err.response?.data?.message || "투어 등록에 실패했습니다. 입력값과 서버 상태를 확인해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const filteredTours =
@@ -81,26 +100,68 @@ const TourManagePage = () => {
       <h2 style={{ color: "#202522", marginTop: 0 }}>[직원 전용] 테마 투어 상품 관리</h2>
 
       {/* 신규 투어 등록 폼 */}
-      <div style={{ background: "#fff", padding: "20px", borderRadius: "10px", border: "1px solid #e6e7e1", marginBottom: "30px" }}>
-        <h3 style={{ marginTop: 0, color: "#2c5f4c" }}>신규 투어 패키지 등록</h3>
-        <form onSubmit={handleAddTour} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+      <div
+        style={{
+          background: "#fff",
+          padding: "26px 28px",
+          borderRadius: "14px",
+          border: "1px solid #e6e7e1",
+          marginBottom: "30px",
+          boxShadow: "0 6px 20px rgba(32, 37, 34, 0.04)",
+        }}
+      >
+        <h3 style={{ marginTop: 0, marginBottom: "20px", fontSize: "18px", color: "#2c5f4c" }}>
+          신규 투어 패키지 등록
+        </h3>
+
+        <form onSubmit={handleAddTour} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {submitError && (
+            <div role="alert" style={{ color: "#b42318", fontSize: "14px" }}>
+              {submitError}
+            </div>
+          )}
+          {submitMessage && (
+            <div role="status" style={{ color: submitMessage.includes("세션에만") ? "#8a5a00" : "#2c5f4c", fontSize: "14px" }}>
+              {submitMessage}
+            </div>
+          )}
           <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", marginBottom: "5px" }}>투어 상품명</label>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#202522", marginBottom: "6px" }}>
+              투어 상품명
+            </label>
             <input
               type="text"
               placeholder="예: 크루즈 투어"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                borderRadius: "8px",
+                border: "1px solid #d5d8d0",
+                fontSize: "14px",
+                boxSizing: "border-box",
+              }}
             />
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", marginBottom: "5px" }}>테마 카테고리</label>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#202522", marginBottom: "6px" }}>
+              테마 카테고리
+            </label>
             <select
               value={tourTheme}
               onChange={(e) => setTourTheme(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                borderRadius: "8px",
+                border: "1px solid #d5d8d0",
+                fontSize: "14px",
+                background: "#fff",
+                boxSizing: "border-box",
+                cursor: "pointer",
+              }}
             >
               <option value="HONEYMOON">HONEYMOON (허니문)</option>
               <option value="PARENT">PARENT (효도 힐링)</option>
@@ -110,62 +171,118 @@ const TourManagePage = () => {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", marginBottom: "5px" }}>출발지 ➔ 도착지</label>
-            <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#202522", marginBottom: "6px" }}>
+              출발지 ➔ 도착지
+            </label>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               <input
                 type="text"
                 value={departure}
                 onChange={(e) => setDeparture(e.target.value)}
-                style={{ width: "45%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                style={{
+                  flex: 1,
+                  padding: "11px 14px",
+                  borderRadius: "8px",
+                  border: "1px solid #d5d8d0",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                }}
               />
-              <span>➔</span>
+              <span style={{ fontWeight: "bold", color: "#69716c" }}>➔</span>
               <input
                 type="text"
                 placeholder="목적지 (예: 스위스)"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
-                style={{ width: "45%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                style={{
+                  flex: 1,
+                  padding: "11px 14px",
+                  borderRadius: "8px",
+                  border: "1px solid #d5d8d0",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                }}
               />
             </div>
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", marginBottom: "5px" }}>기본 1인 가격 (원)</label>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#202522", marginBottom: "6px" }}>
+              기본 1인 가격 (원)
+            </label>
             <input
               type="number"
               value={basePrice}
               onChange={(e) => setBasePrice(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                borderRadius: "8px",
+                border: "1px solid #d5d8d0",
+                fontSize: "14px",
+                boxSizing: "border-box",
+              }}
             />
           </div>
 
-          <div style={{ gridColumn: "span 2" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", marginBottom: "5px" }}>상세 코스</label>
+          <div>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#202522", marginBottom: "6px" }}>
+              상세 코스
+            </label>
             <input
               type="text"
               placeholder="예: 파리 -> 로마 -> 베네치아"
               value={course}
               onChange={(e) => setCourse(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                borderRadius: "8px",
+                border: "1px solid #d5d8d0",
+                fontSize: "14px",
+                boxSizing: "border-box",
+              }}
             />
           </div>
 
-          <div style={{ gridColumn: "span 2" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", marginBottom: "5px" }}>상품 설명</label>
+          <div>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#202522", marginBottom: "6px" }}>
+              상품 설명
+            </label>
             <textarea
-              rows="2"
+              rows="3"
               placeholder="투어 코스 및 포함 사항 요약 설명"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                borderRadius: "8px",
+                border: "1px solid #d5d8d0",
+                fontSize: "14px",
+                boxSizing: "border-box",
+                resize: "vertical",
+              }}
             />
           </div>
 
-          <div style={{ gridColumn: "span 2" }}>
-            <button type="submit" style={{ padding: "10px 20px", background: "#2c5f4c", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>
-              + 신규 투어 상품 추가
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              marginTop: "4px",
+              padding: "13px 20px",
+              background: submitting ? "#8a9b91" : "#2c5f4c",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "15px",
+              fontWeight: "bold",
+              cursor: submitting ? "wait" : "pointer",
+            }}
+          >
+            {submitting ? "투어 등록 중..." : "+ 신규 투어 상품 추가"}
+          </button>
         </form>
       </div>
 
