@@ -27,7 +27,12 @@ const LoginPage = () => {
         navigate(from && !from.startsWith("/admin") ? from : "/", { replace: true });
       }
     } catch (err) {
-      setError(getErrorMessage(err, "아이디 또는 비밀번호가 맞지 않습니다."));
+      // 백엔드의 401 문구("ID 또는 비밀번호가 잘못되었습니다.") 대신 화면 문구로 통일
+      setError(
+        err.response?.status === 401
+          ? "아이디 또는 비밀번호가 올바르지 않습니다."
+          : getErrorMessage(err, "아이디 또는 비밀번호가 올바르지 않습니다."),
+      );
     } finally {
       setLoading(false);
     }

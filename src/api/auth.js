@@ -8,7 +8,7 @@ export const loginApi = async (loginId, password) => {
   if (IS_MOCK) {
     await sleep();
     const user = mockUsers.find((u) => u.loginId === loginId && u.password === password);
-    if (!user) throw mockError(401, "ID 또는 비밀번호가 잘못되었습니다.", "/api/auth/login");
+    if (!user) throw mockError(401, "아이디 또는 비밀번호가 올바르지 않습니다.", "/api/auth/login");
     setMockSession(user.loginId);
     return;
   }

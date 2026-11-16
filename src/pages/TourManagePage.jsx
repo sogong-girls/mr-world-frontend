@@ -71,8 +71,17 @@ const emptyForm = () => ({
 const toTime = (value) => (value.length === 5 ? `${value}:00` : value);
 const toInt = (value) => Number.parseInt(value, 10);
 
-const inputStyle = { width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", boxSizing: "border-box" };
-const labelStyle = { display: "block", fontSize: "13px", fontWeight: "bold", marginBottom: "5px" };
+// 입력 칸·라벨 모양은 front 10836ce(관리자 투어 추가 UI)를 따름
+const inputStyle = {
+  width: "100%",
+  padding: "11px 14px",
+  borderRadius: "8px",
+  border: "1px solid #d5d8d0",
+  fontSize: "14px",
+  background: "#fff",
+  boxSizing: "border-box",
+};
+const labelStyle = { display: "block", fontSize: "13px", fontWeight: "700", color: "#202522", marginBottom: "6px" };
 const smallLabel = { display: "block", fontSize: "12px", color: "#4f5752", marginBottom: "3px" };
 
 const TourManagePage = () => {
@@ -85,6 +94,7 @@ const TourManagePage = () => {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [submitMessage, setSubmitMessage] = useState("");
   const [listVersion, setListVersion] = useState(0);
 
   useEffect(() => {
@@ -220,9 +230,10 @@ const TourManagePage = () => {
     }
     setSubmitting(true);
     setFormError("");
+    setSubmitMessage("");
     try {
       const created = await createTourApi(request);
-      alert(`[${created?.name || request.name}] 투어를 등록했어요.`);
+      setSubmitMessage(`[${created?.name || request.name}] 투어가 서버에 등록되었습니다.`);
       setForm(emptyForm());
       setListVersion((v) => v + 1);
     } catch (err) {
@@ -243,29 +254,49 @@ const TourManagePage = () => {
       <h2 style={{ color: "#202522", marginTop: 0 }}>[직원 전용] 테마 투어 상품 관리</h2>
 
       {/* 신규 투어 등록 */}
-      <div style={{ background: "#fff", padding: "20px", borderRadius: "10px", border: "1px solid #e6e7e1", marginBottom: "30px" }}>
-        <h3 style={{ marginTop: 0, color: "#2c5f4c" }}>신규 투어 패키지 등록</h3>
-        <form onSubmit={handleAddTour} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "15px" }}>
+      <div
+        style={{
+          background: "#fff",
+          padding: "26px 28px",
+          borderRadius: "14px",
+          border: "1px solid #e6e7e1",
+          marginBottom: "30px",
+          boxShadow: "0 6px 20px rgba(32, 37, 34, 0.04)",
+        }}
+      >
+        <h3 style={{ marginTop: 0, marginBottom: "20px", fontSize: "18px", color: "#2c5f4c" }}>신규 투어 패키지 등록</h3>
+        <form onSubmit={handleAddTour} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {formError && (
+            <div role="alert" style={{ color: "#b42318", fontSize: "14px" }}>
+              {formError}
+            </div>
+          )}
+          {submitMessage && (
+            <div role="status" style={{ color: "#2c5f4c", fontSize: "14px" }}>
+              {submitMessage}
+            </div>
+          )}
           <div>
             <label style={labelStyle} htmlFor="tour-name">투어 상품명</label>
             <input id="tour-name" type="text" placeholder="예: 크루즈 투어" value={form.name} onChange={(e) => setField("name", e.target.value)} style={inputStyle} />
           </div>
 
           <div>
-            <label style={labelStyle} htmlFor="tour-theme">테마</label>
-            <select id="tour-theme" value={form.tourTheme} onChange={(e) => changeTheme(e.target.value)} style={inputStyle}>
-              {Object.entries(THEME_LABELS).map(([code, label]) => (
-                <option key={code} value={code}>{code} ({label})</option>
-              ))}
+            <label style={labelStyle} htmlFor="tour-theme">테마 카테고리</label>
+            <select id="tour-theme" value={form.tourTheme} onChange={(e) => changeTheme(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+              <option value="HONEYMOON">HONEYMOON (허니문)</option>
+              <option value="PARENT">PARENT (효도 힐링)</option>
+              <option value="GOLF">GOLF (골프 리조트)</option>
+              <option value="TREKKING">TREKKING (아웃도어 트레킹)</option>
             </select>
           </div>
 
           <div>
-            <span style={labelStyle}>출발지 → 여행지</span>
-            <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-              <input type="text" aria-label="출발지" value={form.departure} onChange={(e) => setField("departure", e.target.value)} style={inputStyle} />
-              <span>→</span>
-              <input type="text" aria-label="여행지" placeholder="여행지 (예: 스위스)" value={form.destination} onChange={(e) => setField("destination", e.target.value)} style={inputStyle} />
+            <span style={labelStyle}>출발지 ➔ 도착지</span>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <input type="text" aria-label="출발지" value={form.departure} onChange={(e) => setField("departure", e.target.value)} style={{ ...inputStyle, flex: 1 }} />
+              <span style={{ fontWeight: "bold", color: "#69716c" }}>➔</span>
+              <input type="text" aria-label="여행지" placeholder="목적지 (예: 스위스)" value={form.destination} onChange={(e) => setField("destination", e.target.value)} style={{ ...inputStyle, flex: 1 }} />
             </div>
           </div>
 
@@ -312,7 +343,7 @@ const TourManagePage = () => {
 
           <div style={{ gridColumn: "1 / -1" }}>
             <label style={labelStyle} htmlFor="tour-description">상품 설명</label>
-            <textarea id="tour-description" rows="2" placeholder="투어 코스 및 포함 사항 요약 설명" value={form.description} onChange={(e) => setField("description", e.target.value)} style={inputStyle} />
+            <textarea id="tour-description" rows="3" placeholder="투어 코스 및 포함 사항 요약 설명" value={form.description} onChange={(e) => setField("description", e.target.value)} style={{ ...inputStyle, resize: "vertical" }} />
           </div>
 
           {/* 스타일별 기본가 + 호텔 + 식사 */}
@@ -407,13 +438,23 @@ const TourManagePage = () => {
             </div>
           </div>
 
-          {formError && <div role="alert" style={{ gridColumn: "1 / -1", color: "#b91c1c", fontSize: "14px" }}>{formError}</div>}
-
-          <div style={{ gridColumn: "1 / -1" }}>
-            <button type="submit" disabled={submitting} style={{ padding: "10px 20px", background: "#2c5f4c", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>
-              {submitting ? "등록 중..." : "+ 신규 투어 상품 등록"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              marginTop: "4px",
+              padding: "13px 20px",
+              background: submitting ? "#8a9b91" : "#2c5f4c",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "15px",
+              fontWeight: "bold",
+              cursor: submitting ? "wait" : "pointer",
+            }}
+          >
+            {submitting ? "투어 등록 중..." : "+ 신규 투어 상품 추가"}
+          </button>
         </form>
       </div>
 
