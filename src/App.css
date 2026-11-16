@@ -1481,19 +1481,6 @@
   font-size: 12px;
 }
 
-/* 말풍선 한 줄 요약 (좁은 화면에서 카드를 가리지 않게) */
-.ai-widget-summary {
-  width: 100%;
-  padding: 2px 0 0;
-  border: 0;
-  background: none;
-  color: #2c5f4c;
-  font-size: 12px;
-  font-weight: 700;
-  text-align: left;
-  cursor: pointer;
-}
-
 @media (max-width: 680px) {
   .booking-page {
     margin: 12px auto;
