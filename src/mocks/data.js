@@ -1,4 +1,8 @@
 // src/mocks/data.js
+// VITE_USE_MOCK=true일 때만 쓰는 가짜 데이터 (값은 배포 서버와 같게). 백엔드 엔티티처럼 저장해 두고,
+// 응답 모양은 api/*.js가 백엔드와 똑같이 만든다:
+// - 투어 상세 = TourDetailResponse (souvenirId → souvenir 객체, 시각 "09:00:00", 옵션 id는 전체에서 하나씩)
+// - 예약 = BookingResponse / BookingDetailResponse, 기념품 = SouvenirStockResponse
 
 export const mockUsers = [
   {
@@ -7,7 +11,7 @@ export const mockUsers = [
     password: "password123!",
     role: "USER",
     name: "홍길동",
-    phoneNumber: "010-1234-5678",
+    phoneNumber: "01012345678",
     address: "서울특별시 강남구",
     isRegular: true,
   },
@@ -17,8 +21,18 @@ export const mockUsers = [
     password: "admin123!",
     role: "ADMIN",
     name: "관리자",
-    phoneNumber: "010-9999-9999",
+    phoneNumber: "01099999999",
     address: "서울특별시 중구",
+    isRegular: false,
+  },
+  {
+    id: 3,
+    loginId: "minji",
+    password: "password123!",
+    role: "USER",
+    name: "김민지",
+    phoneNumber: "01055556666",
+    address: "부산광역시 해운대구",
     isRegular: false,
   },
 ];
@@ -34,28 +48,26 @@ export const mockTours = [
     souvenirId: 1,
     nights: 6,
     days: 7,
-    departureTime: "09:00",
-    arrivalTime: "18:00",
+    departureTime: "09:00:00",
+    arrivalTime: "18:00:00",
     course: "파리 -> 로마 -> 베네치아",
     description: "로맨틱 스페셜 룸 데코레이션, 커플 기념 티, 2인 전용 고급 차량 제공",
     styles: [
-      { id: 1, tourId: 1, type: "GRAND", basePrice: 2180000, regularDiscount: 0.1, hotelOptionId: 2, foodOptionId: 2, description: "4성급 호텔 및 현지식 레스토랑" },
-      { id: 2, tourId: 1, type: "PREMIUM", basePrice: 2940000, regularDiscount: 0.1, hotelOptionId: 3, foodOptionId: 3, description: "5성급 호텔 및 스테이크 전문 고급 레스토랑" }
+      { id: 1, tourId: 1, type: "GRAND", basePrice: 2180000, regularDiscount: 0.1, hotelOptionId: 1, foodOptionId: 1, description: "4성급 호텔 및 현지식 레스토랑" },
+      { id: 2, tourId: 1, type: "PREMIUM", basePrice: 2940000, regularDiscount: 0.1, hotelOptionId: 2, foodOptionId: 2, description: "5성급 호텔 및 스테이크 전문 고급 레스토랑" },
     ],
     hotelOptions: [
-      { id: 1, tourId: 1, name: "3성급 부티크 호텔", location: "파리", grade: "_3_STAR", price: 0, description: "클래식 선택 시 이용 가능한 기본 호텔" },
-      { id: 2, tourId: 1, name: "4성급 프리미엄 호텔", location: "파리", grade: "_4_STAR", price: 200000, description: "그랜드 기본 호텔" },
-      { id: 3, tourId: 1, name: "5성급 로맨틱 호텔", location: "파리", grade: "_5_STAR", price: 350000, description: "프리미엄 기본 호텔" }
+      { id: 1, tourId: 1, name: "4성급 프리미엄 호텔", location: "파리", grade: "_4_STAR", price: 0, description: "그랜드 기본 호텔" },
+      { id: 2, tourId: 1, name: "5성급 로맨틱 호텔", location: "파리", grade: "_5_STAR", price: 350000, description: "프리미엄 기본 호텔" },
     ],
     foodOptions: [
-      { id: 1, tourId: 1, name: "도시락", type: "LUNCHBOX", price: 0, description: "클래식 기본 식사" },
-      { id: 2, tourId: 1, name: "현지식 레스토랑", type: "LOCAL_RESTAURANT", price: 50000, description: "그랜드 기본 식사" },
-      { id: 3, tourId: 1, name: "스테이크 전문 고급 레스토랑", type: "PREMIUM_RESTAURANT", price: 180000, description: "프리미엄 기본 식사, 스테이크와 샴페인 제공" }
+      { id: 1, tourId: 1, name: "현지식 레스토랑", type: "LOCAL_RESTAURANT", price: 0, description: "그랜드 기본 식사" },
+      { id: 2, tourId: 1, name: "스테이크 전문 고급 레스토랑", type: "PREMIUM_RESTAURANT", price: 180000, description: "프리미엄 기본 식사, 스테이크와 샴페인 제공" },
     ],
     addonOptions: [
       { id: 1, tourId: 1, type: "COFFEE", price: 10000, description: "원하는 식사 때 커피 추가" },
-      { id: 2, tourId: 1, type: "CHAMPAGNE", price: 50000, description: "원하는 식사 때 샴페인 추가" }
-    ]
+      { id: 2, tourId: 1, type: "CHAMPAGNE", price: 50000, description: "원하는 식사 때 샴페인 추가" },
+    ],
   },
   {
     id: 2,
@@ -67,28 +79,26 @@ export const mockTours = [
     souvenirId: 2,
     nights: 3,
     days: 4,
-    departureTime: "10:00",
-    arrivalTime: "16:00",
+    departureTime: "10:00:00",
+    arrivalTime: "16:00:00",
     course: "온천 마을 -> 교토 -> 오사카",
     description: "고품격 안마·지압 서비스, 건강 인삼 기념품, 10인승 고급 승합차 제공",
     styles: [
-      { id: 3, tourId: 2, type: "GRAND", basePrice: 1940000, regularDiscount: 0.1, hotelOptionId: 2, foodOptionId: 2, description: "4성급 료칸 및 현지식 레스토랑" },
-      { id: 6, tourId: 2, type: "PREMIUM", basePrice: 2580000, regularDiscount: 0.1, hotelOptionId: 3, foodOptionId: 3, description: "5성급 료칸 및 스테이크 전문 고급 레스토랑" }
+      { id: 3, tourId: 2, type: "GRAND", basePrice: 1940000, regularDiscount: 0.1, hotelOptionId: 3, foodOptionId: 3, description: "4성급 료칸 및 현지식 레스토랑" },
+      { id: 4, tourId: 2, type: "PREMIUM", basePrice: 2580000, regularDiscount: 0.1, hotelOptionId: 4, foodOptionId: 4, description: "5성급 료칸 및 스테이크 전문 고급 레스토랑" },
     ],
     hotelOptions: [
-      { id: 1, tourId: 2, name: "3성급 온천 호텔", location: "일본 온천 지역", grade: "_3_STAR", price: 0, description: "클래식 선택 시 이용 가능한 기본 호텔" },
-      { id: 2, tourId: 2, name: "4성급 온천 료칸", location: "일본 온천 지역", grade: "_4_STAR", price: 150000, description: "그랜드 기본 료칸" },
-      { id: 3, tourId: 2, name: "5성급 프리미엄 료칸", location: "일본 온천 지역", grade: "_5_STAR", price: 300000, description: "프리미엄 기본 료칸" }
+      { id: 3, tourId: 2, name: "4성급 온천 료칸", location: "일본 온천 지역", grade: "_4_STAR", price: 0, description: "그랜드 기본 료칸" },
+      { id: 4, tourId: 2, name: "5성급 프리미엄 료칸", location: "일본 온천 지역", grade: "_5_STAR", price: 300000, description: "프리미엄 기본 료칸" },
     ],
     foodOptions: [
-      { id: 1, tourId: 2, name: "도시락", type: "LUNCHBOX", price: 0, description: "클래식 기본 식사" },
-      { id: 2, tourId: 2, name: "가이세키 정식", type: "LOCAL_RESTAURANT", price: 40000, description: "그랜드 기본 현지식" },
-      { id: 3, tourId: 2, name: "스테이크 전문 고급 레스토랑", type: "PREMIUM_RESTAURANT", price: 150000, description: "프리미엄 기본 식사, 스테이크와 샴페인 제공" }
+      { id: 3, tourId: 2, name: "가이세키 정식", type: "LOCAL_RESTAURANT", price: 0, description: "그랜드 기본 현지식" },
+      { id: 4, tourId: 2, name: "스테이크 전문 고급 레스토랑", type: "PREMIUM_RESTAURANT", price: 150000, description: "프리미엄 기본 식사, 스테이크와 샴페인 제공" },
     ],
     addonOptions: [
-      { id: 1, tourId: 2, type: "COFFEE", price: 5000, description: "원하는 식사 때 커피 추가" },
-      { id: 2, tourId: 2, type: "CHAMPAGNE", price: 45000, description: "원하는 식사 때 샴페인 추가" }
-    ]
+      { id: 3, tourId: 2, type: "COFFEE", price: 5000, description: "원하는 식사 때 커피 추가" },
+      { id: 4, tourId: 2, type: "CHAMPAGNE", price: 45000, description: "원하는 식사 때 샴페인 추가" },
+    ],
   },
   {
     id: 3,
@@ -100,29 +110,29 @@ export const mockTours = [
     souvenirId: 3,
     nights: 2,
     days: 3,
-    departureTime: "08:00",
-    arrivalTime: "19:00",
+    departureTime: "08:00:00",
+    arrivalTime: "19:00:00",
     course: "제주 명문 골프장 36홀",
     description: "유명 골프 리조트 테마 연출, 골프 액세서리와 골프공 제공, 10인승 고급 승합차 이용",
     styles: [
-      { id: 4, tourId: 3, type: "CLASSIC", basePrice: 990000, regularDiscount: 0.1, hotelOptionId: 1, foodOptionId: 1, description: "3성급 리조트 및 도시락" },
-      { id: 7, tourId: 3, type: "GRAND", basePrice: 1390000, regularDiscount: 0.1, hotelOptionId: 2, foodOptionId: 2, description: "4성급 리조트 및 현지식 레스토랑" },
-      { id: 8, tourId: 3, type: "PREMIUM", basePrice: 1890000, regularDiscount: 0.1, hotelOptionId: 3, foodOptionId: 3, description: "5성급 리조트 및 스테이크 전문 고급 레스토랑" }
+      { id: 5, tourId: 3, type: "CLASSIC", basePrice: 990000, regularDiscount: 0.1, hotelOptionId: 5, foodOptionId: 5, description: "3성급 리조트 및 도시락" },
+      { id: 6, tourId: 3, type: "GRAND", basePrice: 1390000, regularDiscount: 0.1, hotelOptionId: 6, foodOptionId: 6, description: "4성급 리조트 및 현지식 레스토랑" },
+      { id: 7, tourId: 3, type: "PREMIUM", basePrice: 1890000, regularDiscount: 0.1, hotelOptionId: 7, foodOptionId: 7, description: "5성급 리조트 및 스테이크 전문 고급 레스토랑" },
     ],
     hotelOptions: [
-      { id: 1, tourId: 3, name: "3성급 제주 골프 리조트", location: "제주도", grade: "_3_STAR", price: 0, description: "클래식 기본 리조트" },
-      { id: 2, tourId: 3, name: "4성급 제주 골프 리조트", location: "제주도", grade: "_4_STAR", price: 180000, description: "그랜드 리조트" },
-      { id: 3, tourId: 3, name: "5성급 제주 골프 리조트", location: "제주도", grade: "_5_STAR", price: 420000, description: "프리미엄 리조트" }
+      { id: 5, tourId: 3, name: "3성급 제주 골프 리조트", location: "제주도", grade: "_3_STAR", price: 0, description: "클래식 기본 리조트" },
+      { id: 6, tourId: 3, name: "4성급 제주 골프 리조트", location: "제주도", grade: "_4_STAR", price: 180000, description: "그랜드 기본 리조트" },
+      { id: 7, tourId: 3, name: "5성급 제주 골프 리조트", location: "제주도", grade: "_5_STAR", price: 420000, description: "프리미엄 기본 리조트" },
     ],
     foodOptions: [
-      { id: 1, tourId: 3, name: "도시락", type: "LUNCHBOX", price: 0, description: "클래식 기본 식사" },
-      { id: 2, tourId: 3, name: "클럽하우스 현지식", type: "LOCAL_RESTAURANT", price: 70000, description: "그랜드 기본 식사" },
-      { id: 3, tourId: 3, name: "스테이크 전문 고급 레스토랑", type: "PREMIUM_RESTAURANT", price: 160000, description: "프리미엄 기본 식사, 스테이크와 샴페인 제공" }
+      { id: 5, tourId: 3, name: "도시락", type: "LUNCHBOX", price: 0, description: "클래식 기본 식사" },
+      { id: 6, tourId: 3, name: "클럽하우스 현지식", type: "LOCAL_RESTAURANT", price: 70000, description: "그랜드 기본 식사" },
+      { id: 7, tourId: 3, name: "스테이크 전문 고급 레스토랑", type: "PREMIUM_RESTAURANT", price: 160000, description: "프리미엄 기본 식사, 스테이크와 샴페인 제공" },
     ],
     addonOptions: [
-      { id: 1, tourId: 3, type: "COFFEE", price: 10000, description: "원하는 식사 때 커피 추가" },
-      { id: 2, tourId: 3, type: "CHAMPAGNE", price: 50000, description: "원하는 식사 때 샴페인 추가" }
-    ]
+      { id: 5, tourId: 3, type: "COFFEE", price: 10000, description: "원하는 식사 때 커피 추가" },
+      { id: 6, tourId: 3, type: "CHAMPAGNE", price: 50000, description: "원하는 식사 때 샴페인 추가" },
+    ],
   },
   {
     id: 4,
@@ -134,60 +144,152 @@ export const mockTours = [
     souvenirId: 4,
     nights: 1,
     days: 2,
-    departureTime: "07:00",
-    arrivalTime: "17:00",
+    departureTime: "07:00:00",
+    arrivalTime: "17:00:00",
     course: "설악산 비선대 -> 대청봉 코스",
     description: "전문 가이드와 함께하는 아웃도어 트레킹, 산악 테마 연출과 기념 스카프 제공, 10인승 고급 승합차 이용",
     styles: [
-      { id: 5, tourId: 4, type: "CLASSIC", basePrice: 390000, regularDiscount: 0.1, hotelOptionId: 1, foodOptionId: 1, description: "3성급 산악 숙소 및 도시락" },
-      { id: 9, tourId: 4, type: "GRAND", basePrice: 590000, regularDiscount: 0.1, hotelOptionId: 2, foodOptionId: 2, description: "4성급 숙소 및 현지식 레스토랑" },
-      { id: 10, tourId: 4, type: "PREMIUM", basePrice: 890000, regularDiscount: 0.1, hotelOptionId: 3, foodOptionId: 3, description: "5성급 숙소 및 스테이크 전문 고급 레스토랑" }
+      { id: 8, tourId: 4, type: "CLASSIC", basePrice: 390000, regularDiscount: 0.1, hotelOptionId: 8, foodOptionId: 8, description: "3성급 산악 숙소 및 도시락" },
+      { id: 9, tourId: 4, type: "GRAND", basePrice: 590000, regularDiscount: 0.1, hotelOptionId: 9, foodOptionId: 9, description: "4성급 숙소 및 현지식 레스토랑" },
+      { id: 10, tourId: 4, type: "PREMIUM", basePrice: 890000, regularDiscount: 0.1, hotelOptionId: 10, foodOptionId: 10, description: "5성급 숙소 및 스테이크 전문 고급 레스토랑" },
     ],
     hotelOptions: [
-      { id: 1, tourId: 4, name: "3성급 산악 숙소", location: "설악산", grade: "_3_STAR", price: 0, description: "클래식 기본 숙소" },
-      { id: 2, tourId: 4, name: "4성급 산악 호텔", location: "설악산", grade: "_4_STAR", price: 100000, description: "그랜드 숙소" },
-      { id: 3, tourId: 4, name: "5성급 산악 리조트", location: "설악산 인근", grade: "_5_STAR", price: 250000, description: "프리미엄 숙소" }
+      { id: 8, tourId: 4, name: "3성급 산악 숙소", location: "설악산", grade: "_3_STAR", price: 0, description: "클래식 기본 숙소" },
+      { id: 9, tourId: 4, name: "4성급 산악 호텔", location: "설악산", grade: "_4_STAR", price: 100000, description: "그랜드 기본 숙소" },
+      { id: 10, tourId: 4, name: "5성급 산악 리조트", location: "설악산 인근", grade: "_5_STAR", price: 250000, description: "프리미엄 기본 숙소" },
     ],
     foodOptions: [
-      { id: 1, tourId: 4, name: "도시락", type: "LUNCHBOX", price: 0, description: "클래식 기본 식사" },
-      { id: 2, tourId: 4, name: "산채 정식", type: "LOCAL_RESTAURANT", price: 35000, description: "그랜드 기본 지역 식사" },
-      { id: 3, tourId: 4, name: "스테이크 전문 고급 레스토랑", type: "PREMIUM_RESTAURANT", price: 90000, description: "프리미엄 기본 식사, 스테이크와 샴페인 제공" }
+      { id: 8, tourId: 4, name: "도시락", type: "LUNCHBOX", price: 0, description: "클래식 기본 식사" },
+      { id: 9, tourId: 4, name: "산채 정식", type: "LOCAL_RESTAURANT", price: 35000, description: "그랜드 기본 지역 식사" },
+      { id: 10, tourId: 4, name: "스테이크 전문 고급 레스토랑", type: "PREMIUM_RESTAURANT", price: 90000, description: "프리미엄 기본 식사, 스테이크와 샴페인 제공" },
     ],
     addonOptions: [
-      { id: 1, tourId: 4, type: "COFFEE", price: 5000, description: "원하는 식사 때 커피 추가" },
-      { id: 2, tourId: 4, type: "CHAMPAGNE", price: 40000, description: "원하는 식사 때 샴페인 추가" }
-    ]
-  }
+      { id: 7, tourId: 4, type: "COFFEE", price: 5000, description: "원하는 식사 때 커피 추가" },
+      { id: 8, tourId: 4, type: "CHAMPAGNE", price: 40000, description: "원하는 식사 때 샴페인 추가" },
+    ],
+  },
 ];
 
-export const mockBookings = [
+// 예약 레코드 (백엔드 Booking 엔티티에 해당). 응답 모양은 api/bookings.js에서 만든다.
+export const mockBookingRecords = [
   {
     id: 100,
     tourId: 1,
-    tourName: "허니문 낭만 투어",
     userId: 1,
+    tourStyleId: 1,
     tourStyleType: "GRAND",
-    hotelOption: "5성급 로맨틱 호텔",
-    mealOption: "스테이크 전문 고급 레스토랑",
-    bookingAddons: ["커피 (2일차 저녁)", "샴페인 (4일차 저녁)"],
-    totalPrice: 5540000,
+    hotelOptionId: 1,
+    foodOptionId: 1,
+    bookingAddons: [{ id: 1, addonOptionId: 2, nthDay: 3, meal: "DINNER" }],
+    totalPrice: 4460000,
+    discountPrice: 0,
     participantsCount: 2,
-    startAt: "2026-08-03T09:00:00+09:00",
-    endAt: "2026-08-10T18:00:00+09:00",
+    startAt: "2026-08-03T09:00:00",
+    endAt: "2026-08-09T18:00:00",
     status: "ARRIVED",
-    createdAt: "2026-06-01T14:30:00+09:00"
+    paymentDueAt: "2026-06-02T14:30:00",
+    paidAt: "2026-06-01T20:10:00",
+    createdAt: "2026-06-01T14:30:00",
   },
   {
     id: 101,
+    tourId: 3,
+    userId: 1,
+    tourStyleId: 5,
+    tourStyleType: "CLASSIC",
+    hotelOptionId: 5,
+    foodOptionId: 5,
+    bookingAddons: [],
+    totalPrice: 3960000,
+    discountPrice: 0,
+    participantsCount: 4,
+    startAt: "2026-05-10T08:00:00",
+    endAt: "2026-05-12T19:00:00",
+    status: "ARRIVED",
+    paymentDueAt: "2026-04-02T11:00:00",
+    paidAt: "2026-04-01T18:00:00",
+    createdAt: "2026-04-01T11:00:00",
+  },
+  {
+    id: 102,
     tourId: 4,
     userId: 1,
-    tourStyleType: "CLASSIC",
-    totalPrice: 780000,
+    tourStyleId: 9,
+    tourStyleType: "GRAND",
+    hotelOptionId: 9,
+    foodOptionId: 9,
+    bookingAddons: [],
+    totalPrice: 1180000,
+    discountPrice: 0,
     participantsCount: 2,
-    startAt: "2027-03-10T07:00:00+09:00",
-    endAt: "2027-03-11T17:00:00+09:00",
+    startAt: "2027-03-10T07:00:00",
+    endAt: "2027-03-11T17:00:00",
     status: "PENDING",
-    createdAt: "2026-11-01T14:30:00+09:00"
-  }
+    createdAt: "2026-11-01T14:30:00",
+  },
+  {
+    id: 103,
+    tourId: 2,
+    userId: 1,
+    tourStyleId: 4,
+    tourStyleType: "PREMIUM",
+    hotelOptionId: 4,
+    foodOptionId: 4,
+    bookingAddons: [
+      { id: 2, addonOptionId: 4, nthDay: 1, meal: "DINNER" },
+      { id: 3, addonOptionId: 3, nthDay: 2, meal: "BREAKFAST" },
+    ],
+    totalPrice: 10520000,
+    discountPrice: 0,
+    participantsCount: 4,
+    startAt: "2026-12-05T10:00:00",
+    endAt: "2026-12-08T16:00:00",
+    status: "CONFIRMED",
+    paymentDueAt: "2026-11-14T10:00:00",
+    createdAt: "2026-11-13T10:00:00",
+  },
+  {
+    id: 105,
+    tourId: 1,
+    userId: 3,
+    tourStyleId: 1,
+    tourStyleType: "GRAND",
+    hotelOptionId: 1,
+    foodOptionId: 1,
+    bookingAddons: [],
+    totalPrice: 4360000,
+    discountPrice: 0,
+    participantsCount: 2,
+    startAt: "2027-02-01T09:00:00",
+    endAt: "2027-02-07T18:00:00",
+    status: "BOOKED",
+    paymentDueAt: "2026-11-12T09:00:00",
+    paidAt: "2026-11-11T21:00:00",
+    createdAt: "2026-11-11T09:00:00",
+  },
+  {
+    id: 104,
+    tourId: 3,
+    userId: 3,
+    tourStyleId: 6,
+    tourStyleType: "GRAND",
+    hotelOptionId: 6,
+    foodOptionId: 6,
+    bookingAddons: [],
+    totalPrice: 1390000,
+    discountPrice: 0,
+    participantsCount: 1,
+    startAt: "2027-01-15T08:00:00",
+    endAt: "2027-01-17T19:00:00",
+    status: "PENDING",
+    createdAt: "2026-11-10T09:00:00",
+  },
 ];
 
+// 기념품 엔티티 (응답 SouvenirStockResponse는 api/souvenirs.js가 만든다)
+export const mockSouvenirs = [
+  { id: 1, name: "커플 기념티", description: "허니문 낭만 투어 기념품", stockCount: 50 },
+  { id: 2, name: "건강 인삼 세트", description: "효도 힐링 투어 기념품", stockCount: 30 },
+  { id: 3, name: "골프공 세트", description: "골프 챌린지 투어 기념품 (골프 액세서리 포함)", stockCount: 40 },
+  { id: 4, name: "아웃도어 스카프", description: "아웃도어 트레킹 투어 기념품", stockCount: 3 },
+];

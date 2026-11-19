@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/ai/:path*", "destination": "https://mr-world-ai.duckdns.org/api/ai/:path*" },
+    { "source": "/api/:path*", "destination": "https://mr-world-backend.duckdns.org/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
+import { IS_MOCK } from "../api/client";
+import { getErrorMessage } from "../api/errors";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -17,13 +20,19 @@ const LoginPage = () => {
 
     try {
       const user = await login(loginId, password);
+      const from = location.state?.from;
       if (user.role === "ADMIN") {
-        navigate("/admin/tours");
+        navigate(from?.startsWith("/admin") ? from : "/admin/tours", { replace: true });
       } else {
-        navigate("/");
+        navigate(from && !from.startsWith("/admin") ? from : "/", { replace: true });
       }
     } catch (err) {
-      setError(err.response?.data?.message || "아이디 또는 비밀번호가 맞지 않습니다.");
+      // 백엔드의 401 문구("ID 또는 비밀번호가 잘못되었습니다.") 대신 화면 문구로 통일
+      setError(
+        err.response?.status === 401
+          ? "아이디 또는 비밀번호가 올바르지 않습니다."
+          : getErrorMessage(err, "아이디 또는 비밀번호가 올바르지 않습니다."),
+      );
     } finally {
       setLoading(false);
     }
@@ -32,8 +41,8 @@ const LoginPage = () => {
   return (
     <div style={{ maxWidth: "380px", margin: "60px auto", padding: "24px", border: "1px solid #ddd", borderRadius: "8px", background: "#fff" }}>
       <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#0f3460" }}>
-  로그인 (Login)
-</h2>
+        로그인 (Login)
+      </h2>
 
       {error && <div style={{ color: "red", marginBottom: "12px", fontSize: "14px" }}>{error}</div>}
 
@@ -44,7 +53,8 @@ const LoginPage = () => {
             type="text"
             value={loginId}
             onChange={(e) => setLoginId(e.target.value)}
-            placeholder="user123 또는 admin"
+            placeholder={IS_MOCK ? "user123 또는 admin" : "아이디"}
+            autoComplete="username"
             required
             style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
           />
@@ -56,7 +66,8 @@ const LoginPage = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="password123! 또는 admin123!"
+            placeholder={IS_MOCK ? "password123! 또는 admin123!" : "비밀번호"}
+            autoComplete="current-password"
             required
             style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
           />
