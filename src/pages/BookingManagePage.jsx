@@ -8,9 +8,41 @@ import { formatDate } from "../utils/format";
 import { getToursApi } from "../api/tours";
 import LoadingIndicator from "../components/LoadingIndicator";
 
+const DEFAULT_USERS_BY_ID = {
+  1: { loginId: "user123", name: "김여행" },
+  2: { loginId: "admin", name: "관리자" },
+};
+
+const getStoredUsersById = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem("mr_world_registered_users") || "[]");
+    const map = { ...DEFAULT_USERS_BY_ID };
+    saved.forEach((u) => {
+      if (u?.id != null) {
+        map[String(u.id)] = { loginId: u.loginId, name: u.name };
+      }
+    });
+    return map;
+  } catch {
+    return DEFAULT_USERS_BY_ID;
+  }
+};
+
+const formatCustomerLabel = (b, usersById) => {
+  const fallback = usersById[String(b.userId)];
+  const loginId = b.userLoginId || b.loginId || b.user?.loginId || b.memberLoginId || fallback?.loginId;
+  const userName = b.userName || b.name || b.user?.name || b.memberName || fallback?.name;
+
+  if (loginId && userName) return `${loginId} (${userName})`;
+  if (loginId) return loginId;
+  if (userName) return userName;
+  return `회원 #${b.userId}`;
+};
+
 const BookingManagePage = () => {
   const [bookings, setBookings] = useState([]);
   const [toursMap, setToursMap] = useState({});
+  const [usersById] = useState(getStoredUsersById);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -50,7 +82,7 @@ const BookingManagePage = () => {
         <thead>
           <tr style={{ background: "#202522", color: "#fff", textAlign: "left" }}>
             <th style={{ padding: "10px" }}>예약ID</th>
-            <th style={{ padding: "10px" }}>고객명</th>
+            <th style={{ padding: "10px" }}>고객 (아이디/이름)</th>
             <th style={{ padding: "10px" }}>투어 상품명</th>
             <th style={{ padding: "10px" }}>출발일</th>
             <th style={{ padding: "10px" }}>등급/인원</th>
@@ -67,7 +99,7 @@ const BookingManagePage = () => {
             return (
               <tr key={b.id} style={{ borderBottom: "1px solid #eee" }}>
                 <td style={{ padding: "10px", fontWeight: "bold" }}>{b.id}</td>
-                <td style={{ padding: "10px" }}>회원 #{b.userId}</td>
+                <td style={{ padding: "10px", fontWeight: "600" }}>{formatCustomerLabel(b, usersById)}</td>
                 <td style={{ padding: "10px" }}>{tourName}</td>
                 <td style={{ padding: "10px" }}>{formatDate(b.startAt)}</td>
                 <td style={{ padding: "10px" }}>{styleLabel} ({headcount}명)</td>

@@ -1,10 +1,4 @@
 // src/pages/SouvenirInventoryPage.jsx (UC-08 Manage Inventory, 직원)
-// 화면 구성은 front ef19f22(테마 태그 · 총 재고 → 출고 → 남는 재고 · 재고 부족 표시), 데이터는 백엔드 API:
-// - 재고: GET /api/admin/souvenirs → {id, name, description, stockCount, requiredCount, bookings[]}
-//   requiredCount = 결제 완료(준비)·출발 전 예약 인원 (1인 1개). 백엔드는 재고를 자동으로 빼지 않는다.
-// - 테마: 투어 상세(GET /api/tours/{id})의 souvenir.id로 기념품과 투어를 잇는다
-// - 결제 전 예정 수량: GET /api/admin/bookings 중 신청대기·확정(결제 전) 인원 (참고용)
-// - +/−: PATCH /api/admin/souvenirs/{id}/stock {amount} (증감값, 서버에 저장됨)
 import { useEffect, useState } from "react";
 import { getSouvenirsApi, updateSouvenirStockApi } from "../api/souvenirs";
 import { getAllBookingsApi } from "../api/bookings";
@@ -44,9 +38,16 @@ const stockButtonStyle = (disabled) => ({
   color: "#fff",
   border: "none",
   borderRadius: "6px",
+  fontSize: "13px",
   fontWeight: "bold",
   cursor: disabled ? "default" : "pointer",
   opacity: disabled ? 0.5 : 1,
+});
+
+const createEmptyBatchRow = (defaultSouvenirId = "") => ({
+  rowId: `${Date.now()}-${Math.random()}`,
+  souvenirId: defaultSouvenirId ? String(defaultSouvenirId) : "",
+  amount: 10,
 });
 
 const SouvenirInventoryPage = () => {
@@ -57,16 +58,25 @@ const SouvenirInventoryPage = () => {
   const [loadError, setLoadError] = useState("");
   const [pendingId, setPendingId] = useState(null);
   const [actionError, setActionError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+
+  // 일괄 입고 상태
+  const [isBatchOpen, setIsBatchOpen] = useState(false);
+  const [batchRows, setBatchRows] = useState([createEmptyBatchRow()]);
+  const [batchSubmitting, setBatchSubmitting] = useState(false);
 
   useEffect(() => {
     let active = true;
-    // 재고만 꼭 필요하고, 테마·예정 수량은 못 받아도 화면은 보여 준다
     Promise.all([getSouvenirsApi(), loadToursBySouvenir().catch(() => ({})), getAllBookingsApi().catch(() => [])])
       .then(([souvenirs, tourMap, bookingList]) => {
         if (!active) return;
-        setItems(souvenirs || []);
+        const list = souvenirs || [];
+        setItems(list);
         setToursBySouvenir(tourMap);
         setBookings(bookingList || []);
+        if (list.length > 0) {
+          setBatchRows([createEmptyBatchRow(list[0].id)]);
+        }
       })
       .catch((err) => {
         if (active) setLoadError(getErrorMessage(err, "창고 재고를 불러오지 못했어요."));
@@ -82,14 +92,75 @@ const SouvenirInventoryPage = () => {
   const handleStockChange = async (id, amount) => {
     setPendingId(id);
     setActionError("");
+    setActionMessage("");
     try {
       const updated = await updateSouvenirStockApi(id, amount);
-      // 응답(SouvenirResponse)에는 requiredCount·bookings가 없어서 재고만 바꾼다
       setItems((prev) => prev.map((item) => (item.id === id ? { ...item, stockCount: updated.stockCount } : item)));
     } catch (err) {
       setActionError(getErrorMessage(err, "재고를 바꾸지 못했어요."));
     } finally {
       setPendingId(null);
+    }
+  };
+
+  // 일괄 입고 행 조작
+  const handleAddBatchRow = () => {
+    const usedIds = new Set(batchRows.map((r) => r.souvenirId));
+    const nextItem = items.find((it) => !usedIds.has(String(it.id))) || items[0];
+    setBatchRows((prev) => [...prev, createEmptyBatchRow(nextItem?.id ?? "")]);
+  };
+
+  const handleRemoveBatchRow = (rowId) => {
+    setBatchRows((prev) => (prev.length > 1 ? prev.filter((r) => r.rowId !== rowId) : prev));
+  };
+
+  const handleBatchRowChange = (rowId, field, value) => {
+    setBatchRows((prev) =>
+      prev.map((r) => (r.rowId === rowId ? { ...r, [field]: value } : r)),
+    );
+  };
+
+  const handleBatchSubmit = async (e) => {
+    e.preventDefault();
+    setActionError("");
+    setActionMessage("");
+
+    // 같은 기념품을 여러 행에 선택했을 경우 수량 합산
+    const totalsById = {};
+    batchRows.forEach((row) => {
+      const qty = Number(row.amount);
+      if (!row.souvenirId || !Number.isFinite(qty) || qty <= 0) return;
+      totalsById[row.souvenirId] = (totalsById[row.souvenirId] || 0) + Math.floor(qty);
+    });
+
+    const entries = Object.entries(totalsById);
+    if (entries.length === 0) {
+      setActionError("입고할 기념품과 1개 이상의 수량을 입력해 주세요.");
+      return;
+    }
+
+    setBatchSubmitting(true);
+    try {
+      const results = await Promise.all(
+        entries.map(async ([souvenirId, amount]) => {
+          const updated = await updateSouvenirStockApi(Number(souvenirId), amount);
+          return { id: Number(souvenirId), stockCount: updated.stockCount };
+        }),
+      );
+
+      const updatedMap = Object.fromEntries(results.map((r) => [r.id, r.stockCount]));
+      setItems((prev) =>
+        prev.map((item) =>
+          updatedMap[item.id] != null ? { ...item, stockCount: updatedMap[item.id] } : item,
+        ),
+      );
+      setBatchRows([createEmptyBatchRow(items[0]?.id ?? "")]);
+      setIsBatchOpen(false);
+      setActionMessage(`${entries.length}개 품목의 입고 재고가 반영되었어요.`);
+    } catch (err) {
+      setActionError(getErrorMessage(err, "일괄 입고 처리 중 오류가 발생했어요."));
+    } finally {
+      setBatchSubmitting(false);
     }
   };
 
@@ -106,13 +177,168 @@ const SouvenirInventoryPage = () => {
 
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px" }}>
-      <h2 style={{ color: "#202522", marginTop: 0 }}>[직원 전용] 창고 기념품 및 재고 관리</h2>
-      <p style={{ color: "#69716c", marginBottom: "20px" }}>
-        결제를 마친 출발 전 예약 인원만큼(1인 1개) 출고할 수량을 보여 줘요. 실제 입고·출고는 +/− 버튼으로 반영돼요.
-      </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
+        <div>
+          <h2 style={{ color: "#202522", marginTop: 0, marginBottom: "6px" }}>[직원 전용] 창고 기념품 및 재고 관리</h2>
+          <p style={{ color: "#69716c", margin: 0 }}>
+          </p>
+        </div>
+
+        {items.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              setIsBatchOpen((prev) => !prev);
+              setActionError("");
+            }}
+            style={{
+              padding: "10px 16px",
+              background: isBatchOpen ? "#69716c" : "#2c5f4c",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {isBatchOpen ? "일괄 입고 닫기" : "+ 여러 품목 한 번에 입고"}
+          </button>
+        )}
+      </div>
+
+      {/* 여러 품목 일괄 입고 패널 */}
+      {isBatchOpen && (
+        <form
+          onSubmit={handleBatchSubmit}
+          style={{
+            background: "#fff",
+            border: "1.5px solid #2c5f4c",
+            borderRadius: "10px",
+            padding: "18px",
+            marginBottom: "20px",
+          }}
+        >
+          <div style={{ fontWeight: "bold", color: "#202522", marginBottom: "4px" }}>기념품 일괄 입고</div>
+          <div style={{ fontSize: "13px", color: "#69716c", marginBottom: "12px" }}>
+          </div>
+
+          <div style={{ display: "grid", gap: "10px", marginBottom: "14px" }}>
+            {batchRows.map((row, idx) => (
+              <div
+                key={row.rowId}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 120px 36px",
+                  gap: "8px",
+                  alignItems: "center",
+                }}
+              >
+                <select
+                  aria-label={`입고 품목 ${idx + 1}`}
+                  value={row.souvenirId}
+                  onChange={(e) => handleBatchRowChange(row.rowId, "souvenirId", e.target.value)}
+                  disabled={batchSubmitting}
+                  style={{
+                    padding: "9px 10px",
+                    border: "1px solid #d5d7cf",
+                    borderRadius: "8px",
+                    background: "#fff",
+                    color: "#202522",
+                  }}
+                >
+                  <option value="">기념품 선택</option>
+                  {items.map((it) => (
+                    <option key={it.id} value={it.id}>
+                      {it.name} (현재 {it.stockCount}개)
+                    </option>
+                  ))}
+                </select>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    aria-label={`입고 수량 ${idx + 1}`}
+                    value={row.amount}
+                    onChange={(e) => handleBatchRowChange(row.rowId, "amount", e.target.value)}
+                    disabled={batchSubmitting}
+                    style={{
+                      width: "100%",
+                      padding: "9px 10px",
+                      border: "1px solid #d5d7cf",
+                      borderRadius: "8px",
+                      textAlign: "right",
+                    }}
+                  />
+                  <span style={{ fontSize: "13px", color: "#4f5752" }}>개</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleRemoveBatchRow(row.rowId)}
+                  disabled={batchSubmitting || batchRows.length === 1}
+                  title="행 삭제"
+                  aria-label="행 삭제"
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    border: "1px solid #e6e7e1",
+                    borderRadius: "8px",
+                    background: "#fafaf7",
+                    color: "#69716c",
+                    cursor: batchRows.length === 1 ? "default" : "pointer",
+                    opacity: batchRows.length === 1 ? 0.4 : 1,
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={handleAddBatchRow}
+              disabled={batchSubmitting}
+              style={{
+                padding: "8px 14px",
+                border: "1px dashed #2c5f4c",
+                borderRadius: "8px",
+                background: "#f4f8f6",
+                color: "#2c5f4c",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              + 품목 줄 추가
+            </button>
+
+            <button
+              type="submit"
+              disabled={batchSubmitting}
+              style={{
+                padding: "10px 18px",
+                border: "none",
+                borderRadius: "8px",
+                background: "#2c5f4c",
+                color: "#fff",
+                fontWeight: "bold",
+                cursor: batchSubmitting ? "default" : "pointer",
+                opacity: batchSubmitting ? 0.6 : 1,
+              }}
+            >
+              {batchSubmitting ? "입고 반영 중..." : `선택한 ${batchRows.length}개 항목 일괄 입고`}
+            </button>
+          </div>
+        </form>
+      )}
 
       {loadError && <div role="alert" style={{ color: "#99575b", marginBottom: "12px" }}>{loadError}</div>}
       {actionError && <div role="alert" style={{ color: "#b91c1c", marginBottom: "12px" }}>{actionError}</div>}
+      {actionMessage && <div role="status" style={{ color: "#2c5f4c", fontWeight: "bold", marginBottom: "12px" }}>{actionMessage}</div>}
       {!loadError && items.length === 0 && <div style={{ color: "#69716c" }}>등록된 기념품이 없어요.</div>}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>

@@ -45,11 +45,11 @@ export const TRANSPORT_LABELS = {
 
 // 신청대기 → 확정(결제 대기) → 준비(결제 완료) → 진행 → 완료
 export const BOOKING_STATUS = {
-  PENDING: { label: "신청대기", hint: "인원 모집 중", color: "#d97706" },
-  CONFIRMED: { label: "확정", hint: "결제 대기", color: "#2c5f4c" },
-  BOOKED: { label: "준비", hint: "결제 완료", color: "#2563eb" },
-  DEPARTED: { label: "진행", hint: "여행 중", color: "#7c3aed" },
-  ARRIVED: { label: "완료", hint: "여행 끝", color: "#6b7280" },
+  PENDING: { label: "신청대기", hint: "인원 모집 중", color: "#a15f13" },
+  CONFIRMED: { label: "확정", hint: "결제 대기", color: "#1e5a44" },
+  BOOKED: { label: "준비", hint: "결제 완료", color: "#395fb2" },
+  DEPARTED: { label: "진행", hint: "여행 중", color: "#1a1d4c" },
+  ARRIVED: { label: "완료", hint: "여행 끝", color: "#151516" },
 };
 
 export const statusText = (status) => {

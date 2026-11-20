@@ -9,10 +9,10 @@ import { getUnpaidBookings } from "../utils/travelHistory";
 import { formatDate } from "../utils/format";
 
 const THEME_IMAGES = {
-  HONEYMOON: "https://images.unsplash.com/photo-1611441085268-7674a97a0905?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
+  HONEYMOON: "https://i.pinimg.com/1200x/ee/67/0c/ee670ccad306091780db378e32ad5a94.jpg",
   PARENT: "https://images.unsplash.com/photo-1679054142703-6e6d2fa5934f?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
-  GOLF: "https://images.unsplash.com/photo-1728037853328-cd6801e15439?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
-  TREKKING: "https://images.unsplash.com/photo-1603279312618-5009a6caf08b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
+  GOLF: "https://i.pinimg.com/736x/05/ad/d7/05add7012af8da83b65ec4cd3494434b.jpg",
+  TREKKING: "https://i.pinimg.com/736x/73/eb/f6/73ebf61b29e65f0698d3e0bfef2f2c15.jpg",
 };
 
 const THEME_LABELS = {

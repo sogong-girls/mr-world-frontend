@@ -170,9 +170,12 @@ const Layout = () => {
       </div>
 
       {role !== "ADMIN" && pathname !== "/ai-chat" && (
-        <div className="ai-widget">
+        <div className="ai-widget" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
           {isWidgetPromptOpen && (
-            <div className="ai-widget-prompt-wrap">
+            <div
+              className="ai-widget-prompt-wrap"
+              style={{ width: "340px", maxWidth: "calc(100vw - 32px)", position: "relative" }}
+            >
               <button
                 type="button"
                 className="ai-widget-close"
@@ -206,7 +209,12 @@ const Layout = () => {
                 </button>
               )}
 
-              <button type="button" className="ai-widget-prompt" onClick={handleAiClick}>
+              <button
+                type="button"
+                className="ai-widget-prompt"
+                onClick={handleAiClick}
+                style={{ width: "100%", maxWidth: "none", padding: "24px 24px", borderRadius: "18px" }}
+              >
                 <strong>AI 여행 안내</strong>
                 {renderPromptBody()}
               </button>
@@ -214,11 +222,15 @@ const Layout = () => {
           )}
 
           <button className="ai-widget-button" onClick={handleAiClick} aria-label="AI 여행 안내 열기">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              <circle cx="8" cy="10" r="1" fill="currentColor"></circle>
-              <circle cx="12" cy="10" r="1" fill="currentColor"></circle>
-              <circle cx="16" cy="10" r="1" fill="currentColor"></circle>
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 8V4.5" />
+              <circle cx="12" cy="3.5" r="1" fill="currentColor" />
+              <rect width="18" height="13" x="3" y="8" rx="4.5" />
+              <path d="M1.5 14.5H3" />
+              <path d="M21 14.5h1.5" />
+              <circle cx="8.5" cy="13.5" r="1.3" fill="currentColor" />
+              <circle cx="15.5" cy="13.5" r="1.3" fill="currentColor" />
+              <path d="M9 17c.9.8 1.9 1.1 3 1.1s2.1-.3 3-1.1" />
             </svg>
           </button>
         </div>
