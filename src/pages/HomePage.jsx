@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getTourDetailApi, getToursApi } from "../api/tours";
+import { getToursApi } from "../api/tours";
 import { getErrorMessage } from "../api/errors";
 import { useAiChat } from "../context/useAiChat";
 import LoadingIndicator from "../components/LoadingIndicator";
@@ -34,7 +34,6 @@ const HomePage = () => {
   const { myBookings } = useAiChat();
 
   const [tours, setTours] = useState([]);
-  const [startPrices, setStartPrices] = useState({});
   const [activeTab, setActiveTab] = useState("ALL");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -48,18 +47,6 @@ const HomePage = () => {
         if (!isMounted) return;
         setTours(tourData || []);
         setLoading(false);
-
-        // 목록 응답에는 가격이 없어서 상세를 함께 받아 스타일 중 가장 싼 기본가를 "~원부터"로 보여 준다
-        const details = await Promise.all(
-          (tourData || []).map((tour) => getTourDetailApi(tour.id).catch(() => null)),
-        );
-        if (!isMounted) return;
-        const prices = {};
-        details.forEach((detail) => {
-          const basePrices = (detail?.styles || []).map((s) => Number(s.basePrice)).filter(Number.isFinite);
-          if (detail && basePrices.length > 0) prices[detail.id] = Math.min(...basePrices);
-        });
-        setStartPrices(prices);
       } catch (err) {
         if (isMounted) {
           setLoadError(getErrorMessage(err, "투어 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."));
@@ -132,10 +119,12 @@ const HomePage = () => {
             {filteredTours.map((item) => {
               const themeKey = item.tourTheme || item.theme || "HONEYMOON";
               const themeClass = THEME_CLASSES[themeKey] || themeKey.toLowerCase();
-              const price = startPrices[item.id];
+              // 목록 응답의 lowestPrice(스타일 기본가 중 최저가)와 souvenir(1인 1개 증정)를 그대로 쓴다
+              const price = item.lowestPrice;
+              const souvenir = item.souvenir?.name ? item.souvenir : null;
               const formattedPrice = price != null
-                ? `${price.toLocaleString("ko-KR")}원부터`
-                : "가격 확인 중";
+                ? `${Number(price).toLocaleString("ko-KR")}원부터`
+                : "가격 준비 중";
               const route = item.departure && item.destination
                 ? `${item.departure} → ${item.destination}`
                 : item.destination || item.name;
@@ -172,6 +161,17 @@ const HomePage = () => {
                       </svg>
                       <span>{item.course || duration}</span>
                     </div>
+                    {souvenir && (
+                      <div className="package-souvenir">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <rect x="3" y="8" width="18" height="4" rx="1" />
+                          <path d="M12 8v13" />
+                          <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
+                          <path d="M7.5 8a2.5 2.5 0 0 1 0-5C9.5 3 12 8 12 8s2.5-5 4.5-5a2.5 2.5 0 0 1 0 5" />
+                        </svg>
+                        <span>{souvenir.name} · 1인 1개 증정</span>
+                      </div>
+                    )}
                     <div className="package-price">
                       <strong>{formattedPrice}</strong>
                       <span>1인 기준</span>

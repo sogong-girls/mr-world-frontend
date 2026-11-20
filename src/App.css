@@ -309,6 +309,46 @@
   flex: 0 0 auto;
 }
 
+/* 투어 기념품 (1인 1개 증정): 테마 색 띠, 글자는 테마 색을 어둡게 해 대비 4.5:1 이상 */
+.home-page .package-souvenir {
+  margin-top: 12px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 8px;
+  color: #4f5752;
+  background: #f1f2ee;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.home-page .package-souvenir svg {
+  flex: 0 0 auto;
+}
+
+.home-page .theme-honeymoon .package-souvenir {
+  color: #a94f53;
+  background: rgba(206, 111, 114, 0.1);
+}
+
+.home-page .theme-healing .package-souvenir {
+  color: #3a7069;
+  background: rgba(79, 145, 136, 0.1);
+}
+
+.home-page .theme-golf .package-souvenir {
+  color: #456b43;
+  background: rgba(91, 134, 88, 0.1);
+}
+
+.home-page .theme-trekking .package-souvenir {
+  color: #8f561c;
+  background: rgba(211, 138, 62, 0.1);
+}
+
 .home-page .package-price {
   margin-top: auto;
   padding-top: 20px;

@@ -18,7 +18,8 @@ export const clearTourCache = () => {
   detailCache.clear();
 };
 
-// GET /api/tours → TourResponse[] (가격·옵션 없음)
+// GET /api/tours → TourListResponse[] (옵션 없음)
+// lowestPrice = 스타일 기본가 중 최저가, souvenir = {id, name, description, stockCount}. 없으면 필드가 빠진다.
 export const getToursApi = () => {
   if (!listCache) {
     listCache = remember(fetchTours(), () => {
@@ -31,9 +32,15 @@ export const getToursApi = () => {
 const fetchTours = async () => {
   if (IS_MOCK) {
     await sleep();
-    return mockTours.map(({ id, name, departure, destination, tourTheme, nights, days }) => ({
-      id, name, departure, destination, tourTheme, nights, days,
-    }));
+    return mockTours.map(({ id, name, departure, destination, tourTheme, nights, days, styles, souvenirId }) => {
+      const basePrices = styles.map((s) => s.basePrice);
+      const souvenir = mockSouvenirs.find((item) => item.id === souvenirId);
+      return dropNulls({
+        id, name, departure, destination, tourTheme, nights, days,
+        lowestPrice: basePrices.length > 0 ? Math.min(...basePrices) : null,
+        souvenir: souvenir ? { ...souvenir } : null,
+      });
+    });
   }
   const response = await client.get("/api/tours");
   return response.data;
