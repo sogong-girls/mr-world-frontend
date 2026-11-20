@@ -6,16 +6,23 @@ export const IS_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 // 백엔드 주소. 비워 두면 같은 출처(/api/...)로 보낸다:
 // 배포는 vercel.json rewrites, 개발은 vite.config.js proxy가 백엔드로 넘겨 준다.
 const client = axios.create({
+<<<<<<< Updated upstream
   baseURL: import.meta.env.VITE_API_BASE_URL || "",
   withCredentials: true, // 로그인은 HttpOnly 쿠키(access_token, refresh_token)
   headers: {
     "Content-Type": "application/json",
   },
 });
+=======
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  withCredentials: true,
+})
+>>>>>>> Stashed changes
 
 // 액세스 토큰(30분)이 만료되면 401 → refresh를 한 번 부르고 원래 요청을 다시 보낸다.
 let refreshing = null;
 
+<<<<<<< Updated upstream
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -39,3 +46,6 @@ client.interceptors.response.use(
 );
 
 export default client;
+=======
+export default client
+>>>>>>> Stashed changes
