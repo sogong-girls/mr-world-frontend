@@ -3,6 +3,7 @@
 @source inline("min-h-screen flex flex-col flex-1 min-w-0 bg-[#fafaf7] min-h-full text-[#202522] relative mx-auto w-[min(1180px,calc(100%-48px))] py-[82px] text-center max-[680px]:w-[calc(100%-28px)] max-[680px]:pt-[54px] max-[680px]:pb-[48px]");
 
 :root {
+  font-size: 18px; /* 기본 16px → 18px로 전체 비율 확대 */
   font-family: "Noto Sans KR", system-ui, "Segoe UI", sans-serif;
   color: #202522;
   background: #fafaf7;
@@ -22,11 +23,15 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  font-size: 1rem;
+  line-height: 1.6;
   background: #fafaf7;
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -36,4 +41,59 @@ button {
 
 #root {
   min-height: 100vh;
+}
+
+/* px로 고정된 헤더·탭·카드 보조 텍스트 보정 */
+.header-brand {
+  font-size: 1.35rem !important;
+}
+
+.header-nav a,
+.header-user,
+.header-actions .button {
+  font-size: 1rem !important;
+}
+
+.text-xs {
+  font-size: 0.875rem !important;
+}
+
+.text-sm {
+  font-size: 0.95rem !important;
+}
+
+/* HomePage 카테고리 탭 & 투어 카드 폰트 확대 */
+.package-tabs button {
+  font-size: 16px !important;
+  padding: 10px 16px !important;
+}
+
+.package-theme {
+  font-size: 13.5px !important;
+  padding: 5px 12px !important;
+}
+
+.package-title {
+  font-size: 20px !important;
+}
+
+.package-location {
+  font-size: 15px !important;
+}
+
+.package-fact,
+.package-fact span {
+  font-size: 15px !important;
+}
+
+.package-price strong {
+  font-size: 23px !important;
+}
+
+.package-price span {
+  font-size: 14px !important;
+}
+
+.package-rail-footer > span {
+  font-size: 15px !important;
 }

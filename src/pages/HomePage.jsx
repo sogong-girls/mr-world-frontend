@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getToursApi } from "../api/tours";
-import { getMyBookingsApi } from "../api/bookings";
-import { useAuth } from "../context/AuthContext";
+import { getTourDetailApi, getToursApi } from "../api/tours";
+import { getErrorMessage } from "../api/errors";
+import { useAiChat } from "../context/useAiChat";
 import LoadingIndicator from "../components/LoadingIndicator";
+import { BOOKING_STATUS } from "../constants";
+import { getUnpaidBookings } from "../utils/travelHistory";
+import { formatDate } from "../utils/format";
 
 const THEME_IMAGES = {
-  HONEYMOON: "https://images.unsplash.com/photo-1611441085268-7674a97a0905?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
+  HONEYMOON: "https://i.pinimg.com/1200x/ee/67/0c/ee670ccad306091780db378e32ad5a94.jpg",
   PARENT: "https://images.unsplash.com/photo-1679054142703-6e6d2fa5934f?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
-  GOLF: "https://images.unsplash.com/photo-1728037853328-cd6801e15439?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
-  TREKKING: "https://images.unsplash.com/photo-1603279312618-5009a6caf08b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=900&h=600",
+  GOLF: "https://i.pinimg.com/736x/05/ad/d7/05add7012af8da83b65ec4cd3494434b.jpg",
+  TREKKING: "https://i.pinimg.com/736x/73/eb/f6/73ebf61b29e65f0698d3e0bfef2f2c15.jpg",
 };
 
 const THEME_LABELS = {
@@ -28,13 +31,13 @@ const THEME_CLASSES = {
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const auth = useAuth();
-  const isAuthenticated = auth?.isAuthenticated || false;
+  const { myBookings } = useAiChat();
 
   const [tours, setTours] = useState([]);
+  const [startPrices, setStartPrices] = useState({});
   const [activeTab, setActiveTab] = useState("ALL");
-  const [unpaidBooking, setUnpaidBooking] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -42,17 +45,26 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         const tourData = await getToursApi();
-        if (isMounted) setTours(tourData || []);
+        if (!isMounted) return;
+        setTours(tourData || []);
+        setLoading(false);
 
-        if (isAuthenticated) {
-          const myBookings = await getMyBookingsApi();
-          const pendingPayment = (myBookings || []).find((b) => b.status === "CONFIRMED");
-          if (isMounted) setUnpaidBooking(pendingPayment || null);
-        }
+        // 목록 응답에는 가격이 없어서 상세를 함께 받아 스타일 중 가장 싼 기본가를 "~원부터"로 보여 준다
+        const details = await Promise.all(
+          (tourData || []).map((tour) => getTourDetailApi(tour.id).catch(() => null)),
+        );
+        if (!isMounted) return;
+        const prices = {};
+        details.forEach((detail) => {
+          const basePrices = (detail?.styles || []).map((s) => Number(s.basePrice)).filter(Number.isFinite);
+          if (detail && basePrices.length > 0) prices[detail.id] = Math.min(...basePrices);
+        });
+        setStartPrices(prices);
       } catch (err) {
-        console.error("Data load failed:", err);
-      } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoadError(getErrorMessage(err, "투어 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."));
+          setLoading(false);
+        }
       }
     };
 
@@ -60,7 +72,13 @@ const HomePage = () => {
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated]);
+  }, []);
+
+  // 확정됐는데 결제 전인 예약 (출발이 가까운 것 먼저)
+  const unpaidBooking = getUnpaidBookings(myBookings.items)[0] || null;
+  const unpaidTourName = unpaidBooking
+    ? tours.find((t) => t.id === unpaidBooking.tourId)?.name || "신청한 투어"
+    : "";
 
   const filteredTours = activeTab === "ALL" 
     ? tours 
@@ -71,9 +89,9 @@ const HomePage = () => {
       {unpaidBooking && (
         <div className="payment-notice">
           <span>
-            [{unpaidBooking.tourName || "신청한 투어"}] 예약이 승인되었습니다! 24시간 이내에 결제를 완료해 주세요.
+            [{unpaidTourName}] {formatDate(unpaidBooking.startAt)} 출발 예약이 {BOOKING_STATUS.CONFIRMED.label}됐어요. 24시간 안에 결제해 주세요.
           </span>
-          <button type="button" onClick={() => navigate("/payment")} className="button">
+          <button type="button" onClick={() => navigate(`/payment?bookingId=${unpaidBooking.id}`)} className="button">
             결제하기
           </button>
         </div>
@@ -105,6 +123,8 @@ const HomePage = () => {
 
         {loading ? (
           <LoadingIndicator text="테마 투어 목록을 불러오는 중" />
+        ) : loadError ? (
+          <div className="tour-list-message" role="alert">{loadError}</div>
         ) : filteredTours.length === 0 ? (
           <div className="tour-list-message">해당 테마의 등록된 투어 상품이 없습니다.</div>
         ) : (
@@ -112,10 +132,10 @@ const HomePage = () => {
             {filteredTours.map((item) => {
               const themeKey = item.tourTheme || item.theme || "HONEYMOON";
               const themeClass = THEME_CLASSES[themeKey] || themeKey.toLowerCase();
-              const price = item.styles?.[0]?.basePrice ?? item.basePrice;
-              const formattedPrice = price != null && Number.isFinite(Number(price))
-                ? `${Number(price).toLocaleString("ko-KR")}원`
-                : "가격 문의";
+              const price = startPrices[item.id];
+              const formattedPrice = price != null
+                ? `${price.toLocaleString("ko-KR")}원부터`
+                : "가격 확인 중";
               const route = item.departure && item.destination
                 ? `${item.departure} → ${item.destination}`
                 : item.destination || item.name;
