@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { getSouvenirsApi, updateSouvenirStockApi } from "../api/souvenirs";
 import { getAllBookingsApi } from "../api/bookings";
-import { getTourDetailApi, getToursApi } from "../api/tours";
+import { getToursApi } from "../api/tours";
 import { getErrorMessage } from "../api/errors";
 import LoadingIndicator from "../components/LoadingIndicator";
 import { THEME_LABELS, statusText } from "../constants";
@@ -17,12 +17,11 @@ const nowLocal = () => {
   return now.toISOString().slice(0, 19);
 };
 
-// 투어 목록 + 상세 → { 기념품 id: [투어, ...] }
+// 투어 목록(각 투어의 souvenir 포함) → { 기념품 id: [투어, ...] }
 const loadToursBySouvenir = async () => {
   const tours = await getToursApi();
-  const details = await Promise.all((tours || []).map((t) => getTourDetailApi(t.id).catch(() => null)));
   const map = {};
-  details.forEach((tour) => {
+  (tours || []).forEach((tour) => {
     const souvenirId = tour?.souvenir?.id;
     if (souvenirId == null) return;
     (map[souvenirId] ||= []).push(tour);
